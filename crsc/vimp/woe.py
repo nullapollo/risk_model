@@ -36,10 +36,10 @@ def CalcWOE(df, col, target):
     regroup['woe'] = regroup.apply(lambda x: np.log(x.bad_pcnt * 1.0 / x.good_pcnt), axis=1)
     regroup['iv'] = regroup.apply(lambda x: (x.bad_pcnt - x.good_pcnt) * x.woe, axis=1)
 
-    WOE_dict = dict(zip(regroup.col, regroup.woe))
+    WOE_dict = dict(zip(regroup[col], regroup['woe']))
     IV = regroup['iv'].sum()
 
-    return {"WOE": WOE_dict, 'IV': IV}
+    return {"WOE": WOE_dict, 'IV': IV, 'DW': regroup}
 
 
 def FeaturesForecastImportance(df, target, feature_list, plot_flag=False):
