@@ -1,10 +1,7 @@
-import sys
-import pandas as pd
 import numpy as np
-import time
+
 
 def calc_score_median(sample_set, var):
-
     var_list = list(np.unique(sample_set[var]))
     var_median_list = []
     for i in range(len(var_list) - 1):
@@ -13,8 +10,7 @@ def calc_score_median(sample_set, var):
     return var_median_list
 
 
-def choose_best_split(sample_set, var, min_sample,str_y):
-
+def choose_best_split(sample_set, var, min_sample, str_y):
     score_median_list = calc_score_median(sample_set, var)
     median_len = len(score_median_list)
     sample_cnt = sample_set.shape[0]
@@ -57,24 +53,33 @@ def choose_best_split(sample_set, var, min_sample,str_y):
     return bestSplit_point, bestSplit_position
 
 
-def bining_data_split(sample_set, var, min_sample, split_list,str_y):
-
-    split, position = choose_best_split(sample_set, var, min_sample,str_y)
+def bining_data_split(sample_set, var, min_sample, split_list, str_y):
+    split, position = choose_best_split(sample_set, var, min_sample, str_y)
     if split != 0.0:
         split_list.append(split)
     sample_set_left = sample_set[sample_set[var] < split]
     sample_set_right = sample_set[sample_set[var] > split]
     if len(sample_set_left) >= min_sample * 2 and position not in [0.0, 1.0]:
-        bining_data_split(sample_set_left, var, min_sample, split_list,str_y)
+        bining_data_split(sample_set_left, var, min_sample, split_list, str_y)
     else:
         None
     if len(sample_set_right) >= min_sample * 2 and position not in [0.0, 1.0]:
-        bining_data_split(sample_set_right, var, min_sample, split_list,str_y)
+        bining_data_split(sample_set_right, var, min_sample, split_list, str_y)
     else:
         None
 
-def get_bestsplit_list(sample_set, var,str_y,min_rate=0.05):
+
+def get_bestsplit_list(sample_set, var, str_y, min_rate=0.05):
+    """
+    计算最优分箱切点列表
+
+    :param sample_set: 样本数据集 pandas.dataframe
+    :param var: 需要分箱的变量名称
+    :param str_y: 目标 Y 名称
+    :param min_rate: 最小箱占比
+    :return:
+    """
     min_df = sample_set.shape[0] * min_rate
     split_list = []
-    bining_data_split(sample_set, var, min_df, split_list,str_y)
+    bining_data_split(sample_set, var, min_df, split_list, str_y)
     return split_list

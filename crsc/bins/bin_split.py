@@ -2,9 +2,9 @@
 # -*- coding: utf-8 -*-
 # @Time    : 2020/6/2 9:51
 # @Author  : AndrewMa
-# @File    : binsplit.py
+# @File    : bin_split.py
 
-from crsc.bins.binutils import *
+from crsc.bins.bin_utils import *
 
 
 def CategoryBinSplit(df, target, cat_features, max_bins=5):

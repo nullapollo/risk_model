@@ -13,7 +13,7 @@ from crsc.univ.univariate import *
 from crsc.utils.mtools import *
 from crsc.vimp.woe import *
 from crsc.utils.preprocess_function import *
-from crsc.bins.binsplit import ContinuousBinSplit, CategoryBinSplit
+from crsc.bins.bin_split import ContinuousBinSplit, CategoryBinSplit
 
 # ***************************************************************************************************
 # Step 0: 数据集提取

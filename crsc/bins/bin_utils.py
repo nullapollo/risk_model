@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 # @Time    : 2020/6/2 9:54
 # @Author  : AndrewMa
-# @File    : binutils.py
+# @File    : bin_utils.py
 
 import pandas as pd
 
@@ -25,7 +25,9 @@ def BinBadRate(df_data, col, target, grantRateIndicator=0):
 
     regroup = total.merge(bad, left_index=True, right_index=True, how='left')
     regroup.reset_index(level=0, inplace=True)
+    regroup['good'] = regroup['total'] - regroup['bad']
     regroup['bad_rate'] = regroup.apply(lambda x: x.bad * 1.0 / x.total, axis=1)
+    regroup.sort_values(by='col', ascending=True, inplace=True)
 
     dicts = dict(zip(regroup[col], regroup['bad_rate']))
 

@@ -1,16 +1,16 @@
-from local.cart_bins_v1 import get_bestsplit_list
+from crsc.bins.cart_bins import get_bestsplit_list
 import pandas as pd
 import numpy as np
 
 
-# 根据分组返回 woe、iv
 def get_woeinfo_by_group(df, col, target):
     """
     按照分箱结果进行 woe 和 iv 统计
+    group/total/bad/good/bad_rate/good_rate/total_pcnt/bad_pcnt/good_pcnt/woe/iv/sum_iv
 
     :param df: 包含 bin 和 y 的数据集 pandas.dataframe
-    :param col: bin 的字段名称
-    :param target: y 的字段名称
+    :param col: bin 的字段名称 string, 分箱的标签
+    :param target: y 的字段名称 string, 取值 0/1 数值
     :return: woe 和 iv 的统计结果 pandas.dataframe
     """
 
@@ -23,40 +23,39 @@ def get_woeinfo_by_group(df, col, target):
     regroup = total.merge(bad, left_index=True, right_index=True, how='left')
     regroup.reset_index(level=0, inplace=True)
     regroup['good'] = regroup['total'] - regroup['bad']
+    regroup['bad_rate'] = regroup['bad'] / regroup['total']
+    regroup['good_rate'] = regroup['good'] / regroup['total']
 
+    # 这里输入之前，都要确认清楚， N/B/G 都不会是 0
     N = sum(regroup['total'])
     B = sum(regroup['bad'])
     G = N - B
+
+    regroup['total_pcnt'] = 0 if N == 0 else regroup['total'] / N
 
     regroup['bad_pcnt'] = regroup['bad'].apply(lambda x: 0 if B == 0 else x * 1.0 / B)
     regroup['good_pcnt'] = regroup['good'].apply(lambda x: 0 if G == 0 else x * 1.0 / G)
     regroup['bad_pcnt'].replace(0, 1e-6, inplace=True)
     regroup['good_pcnt'].replace(0, 1e-6, inplace=True)
 
-    regroup['woe'] = regroup.apply(lambda x: np.log(x.good_pcnt * 1.0 / x.bad_pcnt), axis=1)
-    regroup['iv'] = regroup.apply(lambda x: (x.good_pcnt - x.bad_pcnt) * np.log(x.good_pcnt * 1.0 / x.bad_pcnt), axis=1)
+    regroup['woe'] = regroup.apply(lambda x: np.log(x.bad_pcnt * 1.0 / x.good_pcnt), axis=1)
+    regroup['iv'] = regroup.apply(lambda x: (x.bad_pcnt - x.good_pcnt) * np.log(x.bad_pcnt * 1.0 / x.good_pcnt), axis=1)
 
     regroup['sum_iv'] = sum(regroup['iv'])
 
-    regroup['bad_rate'] = regroup['bad'] / regroup['total']
-    regroup['good_rate'] = regroup['good'] / regroup['total']
-
     regroup['col'] = col
-    regroup['total_pcnt'] = 0 if N == 0 else regroup['total'] / N
-
     regroup.rename(columns={col: 'group'}, inplace=True)
 
     return regroup
 
 
-# 先进行分箱，分箱完进行分组，分组完计算woe、iv
 def get_woeinfo_withoutgroup(df_data, col, target, min_rate=0.1):
     """
     对变量进行分箱，再做 woe 和 iv 计算
 
     :param df_data: 包含 x 和 y 的数据集 pandas.dataframe
-    :param col: x 变量名称
-    :param target: y
+    :param col: x 变量名称 string
+    :param target: y 目标 string， 取值 0/1
     :param min_rate: 分箱最小箱的比率
     :return: 分箱结果统计 pandas.dataframe
     """
@@ -69,11 +68,11 @@ def get_woeinfo_withoutgroup(df_data, col, target, min_rate=0.1):
         df_group[col] = df_data[col]
         print('%s is string' % col)
 
-    elif len(df_data[col].unique()) <= 8:
+    elif len(df_data[col].unique()) <= 8:  # 数值型变量，取值水平数不超过 8 的也直接按取值分箱
         df_group[col] = df_data[col]
         print('%s is number but unique <=8' % col)
 
-    else:
+    else:  # 数值型变量，取值水平数超过8的，进行分箱操作
         arr_split = get_bestsplit_list(df_data, col, target, min_rate)
         arr_split.append(min(df_data[col]) - 0.001)
         arr_split.append(max(df_data[col]))

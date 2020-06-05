@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 from statsmodels.stats.outliers_influence import variance_inflation_factor
 
-from crsc.bins.binsplit import *
+from crsc.bins.bin_split import *
 from crsc.vimp.woe import *
 
 def CareerYear(x):
