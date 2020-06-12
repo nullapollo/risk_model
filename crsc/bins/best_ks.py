@@ -271,7 +271,7 @@ def combine_helper(data_df, good_name, bad_name, piece_num, cut_off_list, ur):
     knots_list = list(combinations(cut_off_list, piece_num - 1))  # itertools.combinations 做非重复的排列组合
     # here we do some transformation to the knots list, add the start knot and end knot to all the elements in the list
     # knots_list = map(lambda x: sorted(tuple(set(x + (0, len(data_df) - 1)))), knots_list)
-    knots_list = list(map(lambda x: sorted(x + [0, len(data_df) - 1]), knots_list))
+    knots_list = list(map(lambda x: sorted(x + (0, len(data_df) - 1)), knots_list))
     print(len(knots_list))
 
     # 遍历所有的组合
